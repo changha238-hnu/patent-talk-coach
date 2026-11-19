@@ -92,10 +92,13 @@ textarea{min-height:76px;resize:vertical}
 .drive-now{font-family:var(--f-display);font-size:26px;font-weight:800;min-height:3.2em;line-height:1.25}
 .drive-stage{font-size:15px;font-weight:700;color:var(--stamp)}
 svg text{fill:var(--muted);font-size:10px;font-family:var(--f-body)}
-nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
 nav.tabs button{border:0;border-radius:0;background:none;font-size:12px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;min-height:58px}
 nav.tabs button .ic{font-size:20px;line-height:1}
 nav.tabs button[aria-current="page"]{color:var(--accent)}
+.stars{display:flex;gap:4px}
+.stars button{min-height:44px;min-width:44px;padding:0;font-size:28px;line-height:1;border:0;background:none;color:var(--line)}
+.stars button.on{color:#E8A317}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-weight:700;z-index:20;max-width:90vw;text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -237,12 +240,30 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
       <option value="listen">듣기만: 영어 문장 연속 재생 (지하철용)</option>
     </select>
     <label class="note" for="drGap">내 차례 시간 <b id="gapVal"></b>초</label>
-    <input type="range" id="drGap" min="2" max="10" step="1">
+    <input type="range" id="drGap" min="3" max="20" step="1">
+    <label class="note" for="drPause">다음 질문까지 쉬는 시간 <b id="pauseVal"></b>초</label>
+    <input type="range" id="drPause" min="2" max="15" step="1">
     <div class="drive-stage" id="drStage">대기 중</div>
     <div class="drive-now" id="drNow">시작을 누르세요</div>
     <div class="ko" id="drKo"></div>
     <button class="primary big" id="drStart">▶ 시작</button>
     <p class="note" id="drCount" style="margin:0"></p>
+  </div>
+</section>
+
+<!-- MESSAGE TO DEVELOPER -->
+<section class="view" id="v-rev" hidden>
+  <h2>개발자에게 의견 보내기</h2>
+  <div class="card">
+    <p class="note" style="margin:0">보낸 내용은 개발자만 볼 수 있어요. 좋았던 점, 불편한 점, 추가했으면 하는 표현을 자유롭게 알려 주세요.</p>
+    <div class="note">별점 (선택)</div>
+    <div class="stars" id="rStars" role="radiogroup" aria-label="별점"></div>
+    <label class="note" for="rName">이름 또는 닉네임 (선택, 20자까지)</label>
+    <input type="text" id="rName" maxlength="20" autocomplete="off" placeholder="익명">
+    <label class="note" for="rText">메시지 (2~1000자)</label>
+    <textarea id="rText" maxlength="1000" style="min-height:140px" placeholder="예: 운전 모드가 출퇴근에 좋아요. 여행 표현이 더 있으면 좋겠어요."></textarea>
+    <div class="row" style="justify-content:space-between"><span class="note" id="rLen">0 / 1000</span><button class="primary" id="rSend">보내기</button></div>
+    <p class="note" id="rDone" style="margin:0" hidden>✅ 전달됐어요. 소중한 의견 고마워요!</p>
   </div>
 </section>
 
@@ -255,6 +276,7 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
   <button data-v="dict"><span class="ic">🎧</span>받아쓰기</button>
   <button data-v="int"><span class="ic">💼</span>면접</button>
   <button data-v="drive"><span class="ic">🚗</span>운전</button>
+  <button data-v="rev"><span class="ic">✉️</span>의견</button>
 </nav>
 <div class="toast" id="toast" hidden></div>
 
@@ -403,13 +425,15 @@ const IV=[
 const KEY="ptc_v1";
 const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const dayShift=(s,n)=>{const d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
-const DEF={xp:0,streak:0,lastDay:"",att:[],best:{},course:"g",cls:{p:1,g:1},badges:[],rate:0.9,voice:"",gap:5,hide:false,placed:false,driveN:0};
+const DEF={xp:0,streak:0,lastDay:"",att:[],best:{},course:"g",cls:{p:1,g:1},badges:[],rate:0.9,voice:"",gap:8,pause:5,hide:false,placed:false,driveN:0};
 let S=load();
 function load(){
   let r=null;try{r=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}
   const o=Object.assign({},DEF,r||{});
   // earlier versions had only the patent course and a single level field
   if(r&&!r.course)o.course="p";
+  // saves from before the pause setting used a 5s answer window that felt too short in the car
+  if(r&&r.pause==null)o.gap=Math.max(o.gap||0,8);
   o.cls=Object.assign({p:1,g:1},r&&r.cls||{});if(r&&r.cl&&!r.cls)o.cls.p=r.cl;delete o.cl;
   return o;
 }
@@ -686,6 +710,7 @@ $("iModelPlay").onclick=()=>{hush();say(IV[ii][3])};
 /* ---------- drive ---------- */
 let driving=0,wakeLock=null;
 const wait=(ms,tok)=>new Promise(r=>{const t0=Date.now();const iv=setInterval(()=>{if(driving!==tok||Date.now()-t0>=ms){clearInterval(iv);r()}},100)});
+async function rest(tok){$("drStage").textContent="⏸ 잠시 쉬어요";$("drNow").textContent="다음 문장 준비 중…";$("drKo").textContent="";await wait(S.pause*1000,tok)}
 async function driveLoop(tok){
   const mode=$("drMode").value;let k=0;
   const pool=P.map((p,i)=>i).filter(i=>inCourse(i)&&P[i][0]<=cl());
@@ -696,16 +721,18 @@ async function driveLoop(tok){
       $("drStage").textContent="상대방";$("drNow").textContent=d[0];$("drKo").textContent="";await say(d[0]);if(driving!==tok)break;
       $("drStage").textContent="힌트";$("drKo").textContent=d[1];await say(d[1],{lang:"ko-KR",rate:1.05});if(driving!==tok)break;
       $("drStage").textContent="🎙 내 차례 — 영어로 말하세요";$("drNow").textContent="…";await wait(S.gap*1000+1500,tok);if(driving!==tok)break;
-      $("drStage").textContent="모범 답";$("drNow").textContent=d[2];await say(d[2]);await wait(1200,tok);
+      $("drStage").textContent="모범 답";$("drNow").textContent=d[2];await say(d[2]);if(driving!==tok)break;
+      await rest(tok);
     }else{
       const p=P[pool[k%pool.length]];
       if(mode==="shadow"){
         $("drStage").textContent="뜻";$("drNow").textContent=p[3];$("drKo").textContent=p[1];await say(p[3],{lang:"ko-KR",rate:1.05});if(driving!==tok)break;
         $("drStage").textContent="영어";$("drNow").textContent=p[2];await say(p[2]);if(driving!==tok)break;
         $("drStage").textContent="🎙 따라 하세요";await wait(S.gap*1000,tok);if(driving!==tok)break;
-        $("drStage").textContent="한 번 더";await say(p[2]);await wait(S.gap*1000,tok);
+        $("drStage").textContent="한 번 더";await say(p[2]);await wait(S.gap*1000,tok);if(driving!==tok)break;
+        await rest(tok);
       }else{
-        $("drStage").textContent="듣기";$("drNow").textContent=p[2];$("drKo").textContent=p[3];await say(p[2]);await wait(1500,tok);if(driving!==tok)break;await say(p[2]);await wait(2500,tok);
+        $("drStage").textContent="듣기";$("drNow").textContent=p[2];$("drKo").textContent=p[3];await say(p[2]);await wait(1500,tok);if(driving!==tok)break;await say(p[2]);if(driving!==tok)break;await rest(tok);
       }
     }
     if(driving!==tok)break;
@@ -733,12 +760,51 @@ $("setRate").oninput=e=>{S.rate=+e.target.value;$("rateVal").textContent=S.rate+
 $("setCourse").onchange=e=>{S.course=e.target.value;save();renderHome();toast(e.target.selectedOptions[0].textContent.split(" (")[0]+" 코스로 바꿨어요")};
 $("setHide").checked=!!S.hide;$("setHide").onchange=e=>{S.hide=e.target.checked;save()};
 $("drGap").value=S.gap;$("gapVal").textContent=S.gap;$("drGap").oninput=e=>{S.gap=+e.target.value;$("gapVal").textContent=S.gap;save()};
+$("drPause").value=S.pause;$("pauseVal").textContent=S.pause;$("drPause").oninput=e=>{S.pause=+e.target.value;$("pauseVal").textContent=S.pause;save()};
 let resetArm=0;
 $("resetBtn").onclick=()=>{
-  if(Date.now()-resetArm<4000){S=Object.assign({},DEF,{rate:S.rate,voice:S.voice,gap:S.gap,course:S.course,cls:{p:1,g:1}});save();renderHome();$("resetMsg").textContent="초기화했어요";$("resetBtn").textContent="기록 초기화";resetArm=0;return}
+  if(Date.now()-resetArm<4000){S=Object.assign({},DEF,{rate:S.rate,voice:S.voice,gap:S.gap,pause:S.pause,course:S.course,cls:{p:1,g:1}});save();renderHome();$("resetMsg").textContent="초기화했어요";$("resetBtn").textContent="기록 초기화";resetArm=0;return}
   resetArm=Date.now();$("resetBtn").textContent="한 번 더 누르면 초기화";$("resetMsg").textContent="모든 점수·배지가 지워져요";
   setTimeout(()=>{$("resetBtn").textContent="기록 초기화";$("resetMsg").textContent=""},4000);
 };
+
+/* ---------- message to developer (Firestore) ---------- */
+// Public web config — safe to ship; firestore.rules allow create-only, so visitors cannot read messages
+const FIREBASE_CONFIG={"apiKey":"AIzaSyApLYPGqVMSySFgIi6DJzDpxHAiEdUcsMA","authDomain":"patent-talk-coach.firebaseapp.com","projectId":"patent-talk-coach","storageBucket":"patent-talk-coach.firebasestorage.app","messagingSenderId":"769171663553","appId":"1:769171663553:web:1a900bf6e36957ea63c240"};
+const FB_VER="13.1.0";
+let fb=null,rStar=0;
+async function fbInit(){
+  if(fb)return fb;
+  const [app,fs]=await Promise.all([
+    import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-app.js`),
+    import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-firestore.js`)]);
+  const db=fs.getFirestore(app.initializeApp(FIREBASE_CONFIG));
+  fb={fs,col:fs.collection(db,"messages")};
+  return fb;
+}
+function renderStarPicker(){
+  $("rStars").innerHTML=[1,2,3,4,5].map(n=>`<button type="button" role="radio" aria-checked="${n===rStar}" aria-label="${n}점" data-n="${n}" class="${n<=rStar?"on":""}">★</button>`).join("");
+  // tapping the chosen star again clears the optional rating
+  $("rStars").querySelectorAll("button").forEach(b=>b.onclick=()=>{rStar=rStar===+b.dataset.n?0:+b.dataset.n;renderStarPicker()});
+}
+$("rText").oninput=()=>{$("rLen").textContent=$("rText").value.length+" / 1000";$("rDone").hidden=true};
+$("rSend").onclick=async()=>{
+  const text=$("rText").value.trim(),name=$("rName").value.trim().slice(0,20);
+  if(text.length<2){toast("메시지를 2자 이상 써 주세요");return}
+  // light client-side throttle; the rules validate every field
+  if(Date.now()-(S.lastMsg||0)<3*60*1000){toast("메시지는 3분에 한 번 보낼 수 있어요");return}
+  $("rSend").disabled=true;
+  try{
+    const {fs,col}=await fbInit();
+    const doc={name,text,course:S.course,createdAt:fs.serverTimestamp()};if(rStar)doc.rating=rStar;
+    await fs.addDoc(col,doc);
+    S.lastMsg=Date.now();save();
+    rStar=0;renderStarPicker();$("rText").value="";$("rLen").textContent="0 / 1000";$("rDone").hidden=false;
+    toast("개발자에게 전달됐어요 ✉️");
+  }catch(e){toast("보내지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요")}
+  $("rSend").disabled=false;
+};
+renderStarPicker();
 
 /* ---------- navigation ---------- */
 function showView(v){
