@@ -111,6 +111,14 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
 <!-- HOME -->
 <section class="view" id="v-home">
   <div class="card">
+    <label class="label" for="setCourse">학습 코스</label>
+    <select id="setCourse">
+      <option value="g">일반 생활영어 (인사·주문·여행·대화)</option>
+      <option value="p">특허 실무 비즈니스 영어</option>
+    </select>
+    <p class="note" style="margin:0">코스마다 난이도와 기록이 따로 쌓여요. 면접 탭은 특허 실무 질문이에요.</p>
+  </div>
+  <div class="card">
     <div class="row" style="justify-content:space-between"><span class="label">경험치 레벨</span><span class="note" id="xpText"></span></div>
     <div class="bar"><i id="xpBar" style="width:0"></i></div>
     <div class="row" style="justify-content:space-between"><span class="note" id="clText"></span><span class="note" id="unlockText"></span></div>
@@ -308,6 +316,47 @@ const P=[
  [3,"합의 정리","So, to sum up, we'll file the response by the end of the month.","정리하자면, 이번 달 말까지 대응서를 제출하겠습니다.","cinema","To sum up","Absolute cinema"],
  [3,"의견 차이","With all due respect, I see it a little differently.","외람되지만, 저는 조금 다르게 봅니다.","spongebob","With all due respect","I see it differently"]
 ];
+// general-learner course: same shape, tagged track "g"
+const G=[
+ [1,"인사","Nice to meet you.","만나서 반가워요.","handshake","First day","Nice to meet you"],
+ [1,"안부","How's it going?","어떻게 지내요?","monkey","Friend: how's it going?","Me: pretty good, you?"],
+ [1,"감사","Thank you so much for your help.","도와주셔서 정말 감사해요.","oprah","You get a thank you","Everybody gets a thank you"],
+ [1,"사과","Sorry, I'm a little late.","죄송해요, 조금 늦었어요.","harold","Arrives ten minutes late","Sorry, I'm a little late"],
+ [1,"되묻기","Sorry, could you say that again?","죄송한데, 다시 한번 말해 주실래요?","pigeon","Native speaker talks fast","Could you say that again?"],
+ [1,"속도 부탁","Could you speak a little more slowly?","조금 더 천천히 말해 주실래요?","skeleton","Waiting for them","To speak more slowly"],
+ [1,"카페 주문","Can I get an iced americano, please?","아이스 아메리카노 한 잔 주세요.","drake","Pointing at the menu","Can I get an iced americano, please?"],
+ [1,"포장","I'd like it to go, please.","포장해 주세요.","exit","For here","To go, please"],
+ [1,"길 묻기","Excuse me, where is the nearest subway station?","실례지만, 가장 가까운 지하철역이 어디예요?","balloon","Me","The nearest subway station"],
+ [1,"계산","Can I pay by card?","카드로 계산해도 되나요?","buttons","Pay by card","Pay in cash"],
+ [1,"맞장구","That sounds great.","좋아요, 그거 좋네요.","cinema","Friend suggests pizza","That sounds great"],
+ [1,"작별","See you later. Have a good day!","나중에 봐요. 좋은 하루 보내세요!","handshake","Leaving the cafe","Have a good day!"],
+ [2,"호텔 체크인","I have a reservation under the name Kim.","김이라는 이름으로 예약했어요.","trade","I receive: room key","You receive: my name"],
+ [2,"와이파이","What's the Wi-Fi password?","와이파이 비밀번호가 뭐예요?","brain","Check in","Ask for the Wi-Fi password"],
+ [2,"식당 자리","A table for two, please.","두 명 자리 부탁해요.","handshake","Me and my friend","A table for two, please"],
+ [2,"메뉴 추천","What do you recommend?","어떤 메뉴를 추천하세요?","rollsafe","Can't pick the wrong dish","If the waiter picks it"],
+ [2,"알레르기","I'm allergic to peanuts.","저는 땅콩 알레르기가 있어요.","kermit","Order the peanut sauce","Tell them about the allergy"],
+ [2,"계산서","Could we get the check, please?","계산서 주시겠어요?","bernie","I am once again asking","For the check"],
+ [2,"사이즈","Do you have this in a smaller size?","이거 더 작은 사이즈 있나요?","buff","Medium","Smaller size"],
+ [2,"반품","I'd like to return this, please.","이거 반품하고 싶어요.","drake","Keep it","Return it"],
+ [2,"소요 시간","How long does it take to get there?","거기까지 얼마나 걸려요?","skeleton","Me on the bus","How long does it take?"],
+ [2,"약국","I have a headache and a sore throat.","머리가 아프고 목이 따가워요.","fine","Headache and sore throat","This is fine"],
+ [2,"도움 요청","Could you help me with this?","이것 좀 도와주실 수 있나요?","gru","Try it myself","Ask for help"],
+ [2,"분실","I think I left my phone on the bus.","버스에 휴대폰을 두고 내린 것 같아요.","harold","Reaches for my pocket","I left my phone on the bus"],
+ [3,"의견","In my opinion, it's worth a try.","제 생각엔 한번 해볼 만해요.","changemind","It's worth a try","Change my mind"],
+ [3,"부분 동의","I agree with you to some extent.","어느 정도는 동의해요.","same","Your opinion","My opinion (mostly)"],
+ [3,"정중한 반대","I see what you mean, but I'm not so sure.","무슨 말인지 알겠지만, 저는 잘 모르겠어요.","monkey","Friend's big idea","I see what you mean, but..."],
+ [3,"정중한 거절","Thanks for asking, but I already have plans.","물어봐 줘서 고마운데, 이미 약속이 있어요.","drake","Go out tonight","I already have plans"],
+ [3,"허락 구하기","Would you mind if I opened the window?","창문 좀 열어도 될까요?","buttons","Open the window","Ask first"],
+ [3,"스몰토크","What do you do for fun?","쉴 때는 주로 뭐 하면서 놀아요?","boyfriend","Small talk about weather","What do you do for fun?"],
+ [3,"경험","Have you ever been abroad?","해외에 가 본 적 있어요?","balloon","Me","Traveling abroad"],
+ [3,"계획","I'm thinking of learning how to cook.","요리를 배워 볼까 생각 중이에요.","brain","Order delivery","Learn how to cook"],
+ [3,"이해","That makes sense.","그렇군요, 이해가 돼요.","rollsafe","Friend explains","That makes sense"],
+ [3,"뜻 확인","What do you mean by that?","그게 무슨 뜻이에요?","pigeon","Is this a","What do you mean by that?"],
+ [3,"위로","I'm sorry to hear that. I hope things get better.","그 말 들으니 안타까워요. 상황이 나아지길 바라요.","harold","Friend shares bad news","I hope things get better"],
+ [3,"대화 마무리","It was really nice talking to you.","이야기 나눠서 정말 즐거웠어요.","handshake","Great talk","It was really nice talking to you"]
+];
+// appended after the patent phrases so existing ids (and saved scores) keep their meaning
+P.forEach(p=>p[7]="p");G.forEach(p=>{p[7]="g";P.push(p)});
 // drive dialogs: [partner, Korean hint, my answer]
 const D=[
  ["Hi, do you have a minute to talk about our application?","네, 괜찮다고 하고 무슨 일인지 물어보세요","Sure, I have a few minutes. What can I do for you?"],
@@ -322,6 +371,21 @@ const D=[
  ["Is there anything you need from us?","출원 전 서명된 선언서가 필요하다고 하세요","We need the signed declaration before filing."],
  ["Sorry, could you explain the risk again?","분석 내용을 차근차근 설명하겠다고 하세요","I'd be happy to walk you through our analysis."],
  ["Thanks. Let's talk again soon.","다음 주에 다시 이야기하자고 하세요","Let's touch base next week. I'll keep you posted."]
+];
+// general drive dialogs
+const GD=[
+ ["Hi, how's it going?","잘 지낸다고 하고 상대 안부도 물어보세요","Pretty good, thanks. How about you?"],
+ ["What can I get for you?","아이스 아메리카노 한 잔 달라고 하세요","Can I get an iced americano, please?"],
+ ["For here or to go?","포장해 달라고 하세요","I'd like it to go, please."],
+ ["Do you have a reservation?","김이라는 이름으로 예약했다고 하세요","I have a reservation under the name Kim."],
+ ["Are you ready to order?","추천 메뉴를 물어보세요","What do you recommend?"],
+ ["Is there anything else I can get you?","계산서를 달라고 하세요","Could we get the check, please?"],
+ ["How can I help you?","이거 반품하고 싶다고 하세요","I'd like to return this, please."],
+ ["What seems to be the problem?","머리가 아프고 목이 따갑다고 하세요","I have a headache and a sore throat."],
+ ["Do you want to grab dinner tonight?","고맙지만 이미 약속이 있다고 하세요","Thanks for asking, but I already have plans."],
+ ["So, what do you do for fun?","요리를 배워 볼까 생각 중이라고 하세요","I'm thinking of learning how to cook."],
+ ["I failed my driving test again.","안타깝다고, 나아지길 바란다고 하세요","I'm sorry to hear that. I hope things get better."],
+ ["Well, I should get going.","이야기 나눠서 즐거웠다고 하세요","It was really nice talking to you."]
 ];
 // interview: [question, Korean, key phrases[], model answer]
 const IV=[
@@ -339,9 +403,16 @@ const IV=[
 const KEY="ptc_v1";
 const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const dayShift=(s,n)=>{const d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
-const DEF={xp:0,streak:0,lastDay:"",att:[],best:{},cl:1,badges:[],rate:0.9,voice:"",gap:5,hide:false,placed:false,driveN:0};
+const DEF={xp:0,streak:0,lastDay:"",att:[],best:{},course:"g",cls:{p:1,g:1},badges:[],rate:0.9,voice:"",gap:5,hide:false,placed:false,driveN:0};
 let S=load();
-function load(){try{const r=JSON.parse(localStorage.getItem(KEY)||"null");return Object.assign({},DEF,r||{})}catch(e){return Object.assign({},DEF)}}
+function load(){
+  let r=null;try{r=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}
+  const o=Object.assign({},DEF,r||{});
+  // earlier versions had only the patent course and a single level field
+  if(r&&!r.course)o.course="p";
+  o.cls=Object.assign({p:1,g:1},r&&r.cls||{});if(r&&r.cl&&!r.cls)o.cls.p=r.cl;delete o.cl;
+  return o;
+}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
 /* ---------- helpers ---------- */
@@ -420,7 +491,7 @@ const BADGES=[
  ["first","🌱","첫 연습",s=>s.att.length>=1],["s3","🔥","3일 연속",s=>s.streak>=3],["s7","🏅","7일 연속",s=>s.streak>=7],
  ["perfect","🎯","100점",s=>s.att.some(a=>a.s>=100)],["xp200","⭐","200 XP",s=>s.xp>=200],["xp1000","🌟","1000 XP",s=>s.xp>=1000],
  ["dict10","🎧","받아쓰기 10회",s=>s.att.filter(a=>a.m==="d").length>=10],["int5","💼","면접 5회",s=>s.att.filter(a=>a.m==="i").length>=5],
- ["l2","📜","실무 레벨",s=>s.cl>=2],["l3","⚖️","협상 레벨",s=>s.cl>=3],["drive20","🚗","운전 20문장",s=>s.driveN>=20],
+ ["l2","📜","2단계 도달",s=>Math.max(s.cls.p,s.cls.g)>=2],["l3","⚖️","3단계 도달",s=>Math.max(s.cls.p,s.cls.g)>=3],["drive20","🚗","운전 20문장",s=>s.driveN>=20],
  ["master10","🖼️","표현 10개 마스터",s=>Object.keys(s.best).filter(k=>s.best[k]>=85).length>=10]
 ];
 const xpLevel=xp=>Math.floor(Math.sqrt(xp/40))+1;
@@ -439,13 +510,15 @@ function record(mode,id,score,extraXp=0){
   save();renderHeader();
   return gain;
 }
-function levelScores(l){return S.att.filter(a=>(a.m==="p"||a.m==="d")&&P[a.id]&&P[a.id][0]===l).slice(-12).map(a=>a.s)}
+const inCourse=i=>P[i][7]===S.course;
+const cl=()=>S.cls[S.course]||1;
+function levelScores(l){return S.att.filter(a=>(a.m==="p"||a.m==="d")&&P[a.id]&&P[a.id][0]===l&&inCourse(a.id)).slice(-12).map(a=>a.s)}
 function checkUnlock(){
-  if(S.cl>=3)return;
-  const sc=levelScores(S.cl);
-  if(sc.length>=10&&sc.reduce((x,y)=>x+y,0)/sc.length>=85){S.cl++;setTimeout(()=>toast(`난이도 상승! ${CLN[S.cl]} 표현이 열렸어요 📈`),1500)}
+  if(cl()>=3)return;
+  const sc=levelScores(cl());
+  if(sc.length>=10&&sc.reduce((x,y)=>x+y,0)/sc.length>=85){S.cls[S.course]++;setTimeout(()=>toast(`난이도 상승! ${CLN[S.course][cl()]} 표현이 열렸어요 📈`),1500)}
 }
-const CLN={1:"1단계 기본 비즈니스",2:"2단계 특허 실무",3:"3단계 협상·설득"};
+const CLN={p:{1:"1단계 기본 비즈니스",2:"2단계 특허 실무",3:"3단계 협상·설득"},g:{1:"1단계 기본 생활",2:"2단계 여행·생활",3:"3단계 대화·의견"}};
 
 /* ---------- render: header & home ---------- */
 function renderHeader(){$("hStreak").textContent=`🔥 ${S.streak}일`;$("hLvl").textContent=`Lv.${xpLevel(S.xp)} · ${S.xp}XP`}
@@ -455,16 +528,17 @@ function renderHome(){
   const l=xpLevel(S.xp),lo=xpFor(l),hi=xpFor(l+1);
   $("xpText").textContent=`Lv.${l} → Lv.${l+1}: ${S.xp-lo} / ${hi-lo} XP`;
   $("xpBar").style.width=Math.min(100,(S.xp-lo)/(hi-lo)*100)+"%";
-  $("clText").textContent="현재 난이도: "+CLN[S.cl];
-  const sc=levelScores(S.cl);
-  $("unlockText").textContent=S.cl<3?`다음 단계: 최근 10회 평균 85점 (지금 ${sc.length>=1?avg(sc.slice(-10)):"-"}점, ${Math.min(sc.length,10)}/10회)`:"최고 단계";
+  $("setCourse").value=S.course;
+  $("clText").textContent="현재 난이도: "+CLN[S.course][cl()];
+  const sc=levelScores(cl());
+  $("unlockText").textContent=cl()<3?`다음 단계: 최근 10회 평균 85점 (지금 ${sc.length>=1?avg(sc.slice(-10)):"-"}점, ${Math.min(sc.length,10)}/10회)`:"최고 단계";
   const t=today(),todays=S.att.filter(a=>a.d===t);
   $("sToday").textContent=todays.length?avg(todays.map(a=>a.s)):"-";$("sTodayN").textContent=todays.length+"회";
   const wk=new Set([...Array(7)].map((_,i)=>dayShift(t,-i))),pw=new Set([...Array(7)].map((_,i)=>dayShift(t,-7-i)));
   const w=avg(S.att.filter(a=>wk.has(a.d)).map(a=>a.s)),p=avg(S.att.filter(a=>pw.has(a.d)).map(a=>a.s));
   $("sWeek").textContent=w??"-";$("sDelta").textContent=w!=null&&p!=null?(w>=p?"▲ ":"▼ ")+Math.abs(w-p)+"점 (지난주 대비)":"지난주 기록 없음";
-  const m=Object.keys(S.best).filter(k=>k[0]==="p"&&S.best[k]>=85).length;
-  $("sMaster").textContent=m;$("sTotal").textContent="/ "+P.length+"개 (85점↑)";
+  const ids=P.map((p,i)=>i).filter(inCourse),m=ids.filter(i=>S.best["p"+i]>=85).length;
+  $("sMaster").textContent=m;$("sTotal").textContent="/ "+ids.length+"개 (85점↑)";
   $("badges").innerHTML=BADGES.map(([k,ic,nm])=>`<div class="badge ${S.badges.includes(k)?"on":""}"><span class="i">${ic}</span>${nm}</div>`).join("");
   $("goPlace").textContent=S.placed?"레벨 테스트 다시 보기":"레벨 테스트 보기";
   renderChart();
@@ -484,9 +558,9 @@ function renderChart(){
 
 /* ---------- selection ---------- */
 function pickIds(n,prefix){
-  const pool=P.map((p,i)=>i).filter(i=>P[i][0]<=S.cl);
+  const pool=P.map((p,i)=>i).filter(i=>inCourse(i)&&P[i][0]<=cl());
   const b=i=>S.best[prefix+i];
-  const unseen=pool.filter(i=>b(i)==null).sort((x,y)=>(P[y][0]===S.cl)-(P[x][0]===S.cl)||x-y);
+  const unseen=pool.filter(i=>b(i)==null).sort((x,y)=>(P[y][0]===cl())-(P[x][0]===cl())||x-y);
   const weak=pool.filter(i=>b(i)!=null&&b(i)<85).sort((x,y)=>b(x)-b(y));
   const rest=pool.filter(i=>b(i)>=85).sort(()=>Math.random()-.5);
   // mix: mostly new, plus weak review
@@ -510,7 +584,7 @@ let pq=[],pi=0,listening=false;
 function startPractice(){pq=pickIds(5,"p");pi=0;showView("practice");showPhrase()}
 function showPhrase(){
   const p=P[pq[pi]];
-  $("pProg").textContent=`${pi+1} / ${pq.length} · ${CLN[p[0]].slice(0,3)}`;
+  $("pProg").textContent=`${pi+1} / ${pq.length} · ${CLN[p[7]][p[0]].slice(0,3)}`;
   $("pSit").textContent=p[1];$("pEn").textContent=p[2];$("pKo").textContent=p[3];
   $("pEn").classList.toggle("hide",!!S.hide);$("pPeek").hidden=!S.hide;
   mountMeme($("pMeme"),p[4],p[5],p[6]);$("pMemeName").textContent="짤: "+MEMES[p[4]][0];
@@ -546,7 +620,7 @@ $("pNext").onclick=()=>{pi++;if(pi>=pq.length){toast("오늘의 5문장 완료! 
 /* ---------- dictation (+ placement test) ---------- */
 let dq=[],di=0,placing=false,placeScores=[];
 function startDict(){placing=false;dq=pickIds(5,"d").sort(()=>Math.random()-.5);di=0;$("dTitle").textContent="받아쓰기";showView("dict");showDict()}
-function startPlace(){placing=true;placeScores=[];const by=l=>P.map((p,i)=>i).filter(i=>P[i][0]===l);dq=[by(1)[2],by(1)[9],by(2)[0],by(2)[5],by(3)[0],by(3)[2]];di=0;$("dTitle").textContent="레벨 테스트";showView("dict");showDict()}
+function startPlace(){placing=true;placeScores=[];const by=l=>P.map((p,i)=>i).filter(i=>inCourse(i)&&P[i][0]===l);dq=[by(1)[2],by(1)[9],by(2)[0],by(2)[5],by(3)[0],by(3)[2]];di=0;$("dTitle").textContent="레벨 테스트";showView("dict");showDict()}
 function showDict(){
   const p=P[dq[di]];$("dProg").textContent=`${di+1} / ${dq.length}`;$("dSit").textContent=placing?"문장을 듣고 입력하세요 (2번까지 들어도 돼요)":"상황: "+p[1];
   $("dInput").value="";$("dResult").hidden=true;$("dCheck").disabled=false;
@@ -566,8 +640,8 @@ $("dNext").onclick=()=>{
   di++;if(di<dq.length){showDict();return}
   if(placing){
     const a=l=>avg(placeScores.filter(x=>x[0]===l).map(x=>x[1]))||0;
-    S.cl=a(1)>=80?(a(2)>=80?3:2):1;S.placed=true;save();
-    toast(`레벨 테스트 결과: ${CLN[S.cl]} (기본 ${a(1)} · 실무 ${a(2)} · 협상 ${a(3)})`);
+    S.cls[S.course]=a(1)>=80?(a(2)>=80?3:2):1;S.placed=true;save();
+    toast(`레벨 테스트 결과: ${CLN[S.course][cl()]} (1단계 ${a(1)} · 2단계 ${a(2)} · 3단계 ${a(3)})`);
   }else toast("받아쓰기 완료! 👏");
   showView("home");
 };
@@ -614,10 +688,11 @@ let driving=0,wakeLock=null;
 const wait=(ms,tok)=>new Promise(r=>{const t0=Date.now();const iv=setInterval(()=>{if(driving!==tok||Date.now()-t0>=ms){clearInterval(iv);r()}},100)});
 async function driveLoop(tok){
   const mode=$("drMode").value;let k=0;
-  const pool=P.map((p,i)=>i).filter(i=>P[i][0]<=S.cl);
+  const pool=P.map((p,i)=>i).filter(i=>inCourse(i)&&P[i][0]<=cl());
+  const DD=S.course==="g"?GD:D;
   while(driving===tok){
     if(mode==="dialog"){
-      const d=D[k%D.length];
+      const d=DD[k%DD.length];
       $("drStage").textContent="상대방";$("drNow").textContent=d[0];$("drKo").textContent="";await say(d[0]);if(driving!==tok)break;
       $("drStage").textContent="힌트";$("drKo").textContent=d[1];await say(d[1],{lang:"ko-KR",rate:1.05});if(driving!==tok)break;
       $("drStage").textContent="🎙 내 차례 — 영어로 말하세요";$("drNow").textContent="…";await wait(S.gap*1000+1500,tok);if(driving!==tok)break;
@@ -655,11 +730,12 @@ function fillVoices(){
 $("setVoice").onchange=e=>{S.voice=e.target.value;save();hush();say("Thank you for getting back to me.")};
 $("setRate").value=S.rate;$("rateVal").textContent=S.rate+"x";
 $("setRate").oninput=e=>{S.rate=+e.target.value;$("rateVal").textContent=S.rate+"x";save()};
+$("setCourse").onchange=e=>{S.course=e.target.value;save();renderHome();toast(e.target.selectedOptions[0].textContent.split(" (")[0]+" 코스로 바꿨어요")};
 $("setHide").checked=!!S.hide;$("setHide").onchange=e=>{S.hide=e.target.checked;save()};
 $("drGap").value=S.gap;$("gapVal").textContent=S.gap;$("drGap").oninput=e=>{S.gap=+e.target.value;$("gapVal").textContent=S.gap;save()};
 let resetArm=0;
 $("resetBtn").onclick=()=>{
-  if(Date.now()-resetArm<4000){S=Object.assign({},DEF,{rate:S.rate,voice:S.voice,gap:S.gap});save();renderHome();$("resetMsg").textContent="초기화했어요";$("resetBtn").textContent="기록 초기화";resetArm=0;return}
+  if(Date.now()-resetArm<4000){S=Object.assign({},DEF,{rate:S.rate,voice:S.voice,gap:S.gap,course:S.course,cls:{p:1,g:1}});save();renderHome();$("resetMsg").textContent="초기화했어요";$("resetBtn").textContent="기록 초기화";resetArm=0;return}
   resetArm=Date.now();$("resetBtn").textContent="한 번 더 누르면 초기화";$("resetMsg").textContent="모든 점수·배지가 지워져요";
   setTimeout(()=>{$("resetBtn").textContent="기록 초기화";$("resetMsg").textContent=""},4000);
 };
